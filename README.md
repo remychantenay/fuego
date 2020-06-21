@@ -1,5 +1,7 @@
 # fuego (Work In Progress 🏗️)
 [![Build Status](https://travis-ci.org/remychantenay/fuego.svg?branch=master)](https://travis-ci.org/remychantenay/fuego)
+[![Go Report Card](https://goreportcard.com/badge/github.com/remychantenay/fuego)](https://goreportcard.com/report/github.com/remychantenay/fuego)
+[![codebeat badge](https://codebeat.co/badges/60d273d3-08e6-4f48-9c35-86ab75fc1924)](https://codebeat.co/projects/github-com-remychantenay-fuego-master)
 [![GoDoc](https://godoc.org/github.com/remychantenay/fuego?status.svg)](https://godoc.org/github.com/remychantenay/fuego)
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
 
@@ -97,6 +99,8 @@ You also may want to only check if a given document exists without providing a s
 ## Transitive Dependencies
 * Firebase: `firebase.google.com/go`
 * Firestore: `cloud.google.com/go/firestore`
+
+More info [here](https://godoc.org/github.com/remychantenay/fuego?imports)
 
 ## Resources
 [google-cloud-go on GitHub](https://github.com/googleapis/google-cloud-go/tree/master/firestore)
