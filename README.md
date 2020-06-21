@@ -9,6 +9,8 @@ Fuego is a Go client library for Google Firestore.
 
 Fuego does not do anything crazy or magic – its purpose is to reduce the amount of boilerplate by abstracting the ceremony that comes with interacting with Firestore.
 
+![Fuego](https://raw.githubusercontent.com/remychantenay/fuego/master/art/fuego.jpg)
+
 ## Features
 * CRUD operations
 * Write Batches
