@@ -34,8 +34,8 @@ type Doc interface {
 // Document provides features related to Firestore documents.
 type Document struct {
 	FirestoreClient *firestore.Client
-	Path      string
-	ID        string
+	Path            string
+	ID              string
 }
 
 // GetDocumentRef returns a document reference.

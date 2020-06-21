@@ -4,9 +4,9 @@ import (
 	"fmt"
 	"os"
 	//"cloud.google.com/go/firestore"
+	"context"
 	firebase "firebase.google.com/go"
 	"github.com/remychantenay/fuego/document"
-	"context"
 	"testing"
 )
 

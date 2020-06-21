@@ -28,8 +28,8 @@ func (f *Fuego) Document(path, documentID string) document.Doc {
 	path = strings.TrimSuffix(path, "/")
 	return &document.Document{
 		FirestoreClient: f.firestore,
-		Path:      path,
-		ID:        documentID,
+		Path:            path,
+		ID:              documentID,
 	}
 }
 
