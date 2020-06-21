@@ -23,9 +23,9 @@ Fuego does not do anything crazy or magic – its purpose is to reduce the amoun
 go get -u github.com/remychantenay/fuego
 ```
 
-### Examples
+### Document
 Bear in mind that the examples below are not including how to initialize Firebase and the Firestore client. You will find this information in Firebase's documentation.
-#### Create Document
+#### Create
 ```go
     import "github.com/remychantenay/fuego"
 
@@ -57,7 +57,7 @@ Bear in mind that the examples below are not including how to initialize Firebas
         }
     }
 ```
-#### Retrieve Document
+#### Retrieve
 ```go
     user := User{}
     err := fuego.Document("users", "jsmith").Retrieve(ctx, &user)
@@ -68,7 +68,17 @@ Bear in mind that the examples below are not including how to initialize Firebas
     fmt.Println("LastName: ", user.FirstName) // prints Smith
 ```
 
-#### Retrieve Field
+#### Exists
+You also may want to only check if a given document exists without providing a struct:
+```go
+    // Note: false will be returned if an error occurs as well
+    value := fuego.Document("users", "jsmith").Exists(ctx)
+
+    fmt.Println("Exists: ", value)
+```
+
+### Fields
+#### Retrieve
 At times, you may want to retrieve the value of only one field:
 ```go
     value, err := fuego.Document("users", "jsmith").Field("FirstName").Retrieve(ctx)
@@ -80,7 +90,7 @@ At times, you may want to retrieve the value of only one field:
     fmt.Println("FirstName: ", value.(string)) // prints John
 ```
 
-#### Update Field
+#### Update
 Same goes for updating a specific field:
 ```go
     err := fuego.Document("users", "jsmith").Field("FirstName").Update(ctx, "Mike")
@@ -89,13 +99,23 @@ Same goes for updating a specific field:
     }
 ```
 
-#### Exists
-You also may want to only check if a given document exists without providing a struct:
-```go
-    // Note: false will be returned if an error occurs as well
-    value := fuego.Document("users", "jsmith").Exists(ctx)
+#### Update (Map)
+Fuego provides with different ways to update a field that contains a Map:
+* Merge
+* Override
+* Append
 
-    fmt.Println("Exists: ", value)
+```go
+	newMap := map[string]interface{}{
+		"Android": "dPtQzw_6YU0WctLu0kHye-:APA91bEDAUcMhLB3XHK...",
+	}
+
+	err := fuego.Document("users", "jsmith").
+		Field("Tokens").
+		UpdateMap(ctx, newMap, document.Merge) // See document/option.go for more info
+	if err != nil {
+		panic(err.Error())
+	}
 ```
 
 ## Transitive Dependencies
