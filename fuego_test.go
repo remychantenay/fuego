@@ -5,7 +5,7 @@ import (
 	"os"
 	//"cloud.google.com/go/firestore"
 	firebase "firebase.google.com/go"
-	//"google.golang.org/api/option"
+	"github.com/remychantenay/fuego/document"
 	"context"
 	"testing"
 )
@@ -153,7 +153,7 @@ func TestIntegration_Field_UpdateMap_Merge(t *testing.T) {
 
 	err := fuego.Document("users", "jsmith").
 		Field("Tokens").
-		UpdateMap(ctx, expectedNewMap, Merge)
+		UpdateMap(ctx, expectedNewMap, document.Merge)
 	if err != nil {
 		t.Fatalf(err.Error())
 	}
@@ -188,7 +188,7 @@ func TestIntegration_Field_UpdateMapOverride(t *testing.T) {
 
 	err := fuego.Document("users", "jsmith").
 		Field("Tokens").
-		UpdateMap(ctx, expectedNewMap, Override)
+		UpdateMap(ctx, expectedNewMap, document.Override)
 	if err != nil {
 		t.Fatalf(err.Error())
 	}

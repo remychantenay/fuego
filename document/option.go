@@ -1,4 +1,4 @@
-package fuego
+package document
 
 // WriteOption allows to define the expected behaviour when writing to Firetstore
 type WriteOption int

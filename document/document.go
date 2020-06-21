@@ -1,4 +1,4 @@
-package fuego
+package document
 
 import (
 	"cloud.google.com/go/firestore"
@@ -33,7 +33,7 @@ type Doc interface {
 
 // Document provides features related to Firestore documents.
 type Document struct {
-	firestore *firestore.Client
+	FirestoreClient *firestore.Client
 	Path      string
 	ID        string
 }
@@ -41,7 +41,7 @@ type Document struct {
 // GetDocumentRef returns a document reference.
 func (d *Document) GetDocumentRef() *firestore.DocumentRef {
 
-	collectionRef := d.firestore.Collection(d.Path)
+	collectionRef := d.FirestoreClient.Collection(d.Path)
 
 	if len(d.ID) == 0 {
 		return collectionRef.NewDoc()
@@ -98,4 +98,12 @@ func (d *Document) Delete(ctx context.Context) error {
 	}
 
 	return nil
+}
+
+// Field returns a new Field.
+func (d *Document) Field(name string) DocumentField {
+	return &Field{
+		Document: d,
+		Name:     name,
+	}
 }

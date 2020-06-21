@@ -1,4 +1,8 @@
-# fuego
+# fuego (Work In Progress 🏗️)
+[![Build Status](https://travis-ci.org/remychantenay/fuego.svg?branch=master)](https://travis-ci.org/remychantenay/fuego)
+[![GoDoc](https://godoc.org/github.com/remychantenay/fuego?status.svg)](https://godoc.org/github.com/remychantenay/fuego)
+[![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
+
 Fuego is a Go client library for Google Firestore.
 
 Fuego does not do anything crazy or magic – its purpose is to reduce the amount of boilerplate by abstracting the ceremony that comes with interacting with Firestore.
@@ -90,8 +94,12 @@ You also may want to only check if a given document exists without providing a s
     fmt.Println("Exists: ", value)
 ```
 
-## License
-Apache License Version 2.0
+## Transitive Dependencies
+* Firebase: `firebase.google.com/go`
+* Firestore: `cloud.google.com/go/firestore`
 
 ## Resources
 [google-cloud-go on GitHub](https://github.com/googleapis/google-cloud-go/tree/master/firestore)
+
+## License
+Apache License Version 2.0

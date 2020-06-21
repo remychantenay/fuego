@@ -1,4 +1,4 @@
-package fuego
+package document
 
 import "errors"
 
