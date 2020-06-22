@@ -17,9 +17,10 @@ Fuego does not do anything crazy or magic – its purpose is to reduce the amoun
 * Retrieving specific fields only
 * Simple Exists check
 * Collections and Queries
+* Array (append or override)
 
 ### WIP
-* Simple maps and arrays updates
+* Maps
 
 ### TODO
 * Write Batches
@@ -37,9 +38,10 @@ Bear in mind that the examples below are not including how to initialize Firebas
 import "github.com/remychantenay/fuego"
 
 type User struct {
-    FirstName string `firestore:"FirstName"`
-    LastName  string `firestore:"LastName"`
-    EmailAddress  string `firestore:"EmailAddress"`
+    FirstName       string `firestore:"FirstName"`
+    LastName        string `firestore:"LastName"`
+    EmailAddress    string `firestore:"EmailAddress"`
+    Address         string `firestore:"Address"`
 }
 
 func main() {
@@ -47,9 +49,10 @@ func main() {
     fuego := New(firestoreClient) // firestoreClient needs to be created beforehand.
         
     user := User{
-        FirstName: "John",
-        LastName:  "Smith",
-        EmailAddress:  "jsmith@email.com",
+        FirstName:      "John",
+        LastName:       "Smith",
+        EmailAddress:   "jsmith@email.com",
+        Address:        []string{"123 Street", "2nd Building"},
     }
 
     err := fuego.Document("users", "jsmith").Create(ctx, user)
@@ -106,20 +109,23 @@ if err != nil {
 }
 ```
 
-#### Update (Map)
-Fuego provides with different ways to update a field that contains a Map:
-* Merge
-* Override
-* Append
-
+#### Update (Array)
+Fuego provides with different ways to update an array in a document.
+##### Appending
 ```go
-newMap := map[string]interface{}{
-    "Android": "dPtQzw_6YU0WctLu0kHye-:APA91bEDAUcMhLB3XHK...",
-}
-
 err := fuego.Document("users", "jsmith").
-    Field("Tokens").
-    UpdateMap(ctx, newMap, document.Merge) // See document/option.go for more info
+    Field("Address").
+    AppendArray(ctx, []interface{}{"4th Floor"})
+if err != nil {
+    panic(err.Error())
+}
+```
+
+##### Overriding
+```go
+err := fuego.Document("users", "jsmith").
+    Field("Address").
+    OverrideArray(ctx, []interface{}{"4th Floor"})
 if err != nil {
     panic(err.Error())
 }

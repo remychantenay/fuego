@@ -6,7 +6,6 @@ import (
 	//"cloud.google.com/go/firestore"
 	"context"
 	firebase "firebase.google.com/go"
-	"github.com/remychantenay/fuego/document"
 	"testing"
 )
 
@@ -17,6 +16,7 @@ type TestedStruct struct {
 	LastName     string            `firestore:"LastName"`
 	EmailAddress string            `firestore:"EmailAddress"`
 	Tokens       map[string]string `firestore:"Tokens"`
+	Address      []string          `firestore:"Address"`
 }
 
 func TestMain(m *testing.M) {
@@ -84,11 +84,21 @@ func TestIntegration_Document_Create(t *testing.T) {
 			"Android": "AND_123",
 			"IOS":     "IOS_123",
 		},
+		Address: []string{"123 Street", "2nd Building"},
 	}
 
 	err := fuego.Document("users", "jsmith").Create(ctx, user)
 	if err != nil {
 		t.Fatalf(err.Error())
+	}
+}
+
+func TestIntegration_Document_Exists(t *testing.T) {
+	ctx := context.Background()
+
+	value := fuego.Document("users", "jsmith").Exists(ctx)
+	if !value {
+		t.Fatalf("Wanted %v but got %v", true, value)
 	}
 }
 
@@ -180,7 +190,7 @@ func TestIntegration_Field_Update(t *testing.T) {
 	fmt.Println("FirstName: ", value.(string))
 }
 
-func TestIntegration_Field_UpdateMap_Merge(t *testing.T) {
+func TestIntegration_Field_MergeMapWith(t *testing.T) {
 	ctx := context.Background()
 
 	expectedAndroidToken := "AND_456"
@@ -190,7 +200,7 @@ func TestIntegration_Field_UpdateMap_Merge(t *testing.T) {
 
 	err := fuego.Document("users", "jsmith").
 		Field("Tokens").
-		UpdateMap(ctx, expectedNewMap, document.Merge)
+		MergeMapWith(ctx, expectedNewMap)
 	if err != nil {
 		t.Fatalf(err.Error())
 	}
@@ -215,7 +225,8 @@ func TestIntegration_Field_UpdateMap_Merge(t *testing.T) {
 	}
 }
 
-func TestIntegration_Field_UpdateMapOverride(t *testing.T) {
+/* TODO: Finish the work on maps
+func TestIntegration_Field_OverrideMapWith(t *testing.T) {
 	ctx := context.Background()
 
 	expectedAndroidToken := "AND_789"
@@ -225,7 +236,7 @@ func TestIntegration_Field_UpdateMapOverride(t *testing.T) {
 
 	err := fuego.Document("users", "jsmith").
 		Field("Tokens").
-		UpdateMap(ctx, expectedNewMap, document.Override)
+		OverrideMapWith(ctx, expectedNewMap)
 	if err != nil {
 		t.Fatalf(err.Error())
 	}
@@ -248,14 +259,57 @@ func TestIntegration_Field_UpdateMapOverride(t *testing.T) {
 	if androidToken != expectedAndroidToken {
 		t.Fatalf("Got %s but expected %s", androidToken, expectedAndroidToken)
 	}
-}
+}*/
 
-func TestIntegration_Document_Exists(t *testing.T) {
+func TestIntegration_Field_AppendArray(t *testing.T) {
 	ctx := context.Background()
 
-	value := fuego.Document("users", "jsmith").Exists(ctx)
-	if !value {
-		t.Fatalf("Wanted %v but got %v", true, value)
+	expectedArraySizeAfterWrite := 3
+
+	err := fuego.Document("users", "jsmith").
+		Field("Address").
+		AppendArray(ctx, []interface{}{"4th Floor"})
+	if err != nil {
+		t.Fatalf(err.Error())
+	}
+
+	value, err := fuego.Document("users", "jsmith").
+		Field("Address").
+		Retrieve(ctx)
+	if err != nil {
+		t.Fatalf(err.Error())
+	}
+
+	a := value.([]interface{})
+	// Making sure the data has been added
+	if len(a) != expectedArraySizeAfterWrite {
+		t.Fatalf("The array is expected to have %d elements, got %d.", expectedArraySizeAfterWrite, len(a))
+	}
+}
+
+func TestIntegration_Field_OverrideArray(t *testing.T) {
+	ctx := context.Background()
+
+	expectedArraySizeAfterWrite := 1
+
+	err := fuego.Document("users", "jsmith").
+		Field("Address").
+		OverrideArray(ctx, []interface{}{"4th Floor"})
+	if err != nil {
+		t.Fatalf(err.Error())
+	}
+
+	value, err := fuego.Document("users", "jsmith").
+		Field("Address").
+		Retrieve(ctx)
+	if err != nil {
+		t.Fatalf(err.Error())
+	}
+
+	a := value.([]interface{})
+	// Making sure the data has been overridden
+	if len(a) != expectedArraySizeAfterWrite {
+		t.Fatalf("The array is expected to have %d elements, got %d.", expectedArraySizeAfterWrite, len(a))
 	}
 }
 

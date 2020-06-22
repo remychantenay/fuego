@@ -39,14 +39,17 @@ type FirestoreDocument struct {
 
 	// ID is the ID of the document
 	ID string
+
+	firestore *firestore.Client
 }
 
 // New creates and returns a new FirestoreDocument.
 func New(fs *firestore.Client, path, documentID string) *FirestoreDocument {
 	r := fs.Collection(path)
 	return &FirestoreDocument{
-		ColRef: r,
-		ID:     documentID,
+		ColRef:    r,
+		ID:        documentID,
+		firestore: fs,
 	}
 }
 
@@ -113,7 +116,8 @@ func (d *FirestoreDocument) Delete(ctx context.Context) error {
 // Field returns a new Field.
 func (d *FirestoreDocument) Field(name string) DocumentField {
 	return &Field{
-		Document: d,
-		Name:     name,
+		Document:  d,
+		Name:      name,
+		firestore: d.firestore,
 	}
 }
