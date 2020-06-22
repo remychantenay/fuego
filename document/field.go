@@ -28,7 +28,7 @@ type DocumentField interface {
 
 // Field represents a document field.
 type Field struct {
-	Document *Document
+	Document Document
 	Name     string
 }
 

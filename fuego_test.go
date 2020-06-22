@@ -104,6 +104,43 @@ func TestIntegration_Document_Retrieve(t *testing.T) {
 	fmt.Println("FirstName: ", user.FirstName)
 }
 
+func TestIntegration_Collection_Retrieve(t *testing.T) {
+	ctx := context.Background()
+
+	res, err := fuego.Collection("users").Retrieve(ctx, &TestedStruct{})
+	if err != nil {
+		t.Fatalf(err.Error())
+	}
+
+	fmt.Println("FirstName: ", res[0].(*TestedStruct).FirstName)
+}
+
+func TestIntegration_Collection_RetrieveWith(t *testing.T) {
+	ctx := context.Background()
+
+	collection := fuego.Collection("users")
+	query := collection.Where("FirstName", "==", "John").Limit(50)
+
+	// 1. Success
+	res, err := collection.RetrieveWith(ctx, &TestedStruct{}, query)
+	if err != nil {
+		t.Fatalf(err.Error())
+	}
+
+	fmt.Println("FirstName: ", res[0].(*TestedStruct).FirstName)
+
+	// 2. Empty
+	query = collection.Where("FirstName", "==", "Jane").Limit(50)
+	res, err = collection.RetrieveWith(ctx, &TestedStruct{}, query)
+	if err != nil {
+		t.Fatalf(err.Error())
+	}
+
+	if len(res) != 0 {
+		t.Fatalf("Expected an empty slice.")
+	}
+}
+
 func TestIntegration_Field_Retrieve(t *testing.T) {
 	ctx := context.Background()
 

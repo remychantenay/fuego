@@ -2,6 +2,7 @@ package fuego
 
 import (
 	"cloud.google.com/go/firestore"
+	"github.com/remychantenay/fuego/collection"
 	"github.com/remychantenay/fuego/document"
 	"strings"
 )
@@ -19,24 +20,21 @@ func New(fc *firestore.Client) *Fuego {
 	}
 }
 
-// Document returns a new document.
-//
-// path: a path is a sequence of IDs separated by slashes.
-// E.g. "users/user123/bookmarks".
-func (f *Fuego) Document(path, documentID string) document.Doc {
+// Document returns a new FirestoreDocument.
+func (f *Fuego) Document(path, documentID string) *document.FirestoreDocument {
 	path = strings.TrimPrefix(path, "/")
 	path = strings.TrimSuffix(path, "/")
-	return &document.Document{
-		FirestoreClient: f.firestore,
-		Path:            path,
-		ID:              documentID,
-	}
+	return document.New(f.firestore, path, documentID)
 }
 
-// DocumentWithGeneratedID returns a new document without ID.
-//
-// path: a path is a sequence of IDs separated by slashes.
-// E.g. "users/user123/bookmarks".
-func (f *Fuego) DocumentWithGeneratedID(path string) document.Doc {
+// DocumentWithGeneratedID returns a new FirestoreDocument without ID.
+func (f *Fuego) DocumentWithGeneratedID(path string) *document.FirestoreDocument {
 	return f.Document(path, "")
+}
+
+// Collection returns a new FirestoreCollection.
+func (f *Fuego) Collection(path string) *collection.FirestoreCollection {
+	path = strings.TrimPrefix(path, "/")
+	path = strings.TrimSuffix(path, "/")
+	return collection.New(f.firestore, path)
 }
