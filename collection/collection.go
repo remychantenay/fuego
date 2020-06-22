@@ -62,22 +62,5 @@ func (c *FirestoreCollection) Retrieve(ctx context.Context, sample interface{}) 
 // RetrieveWith retrieve documents from a collection using the provided Query.
 func (c *FirestoreCollection) RetrieveWith(ctx context.Context, sample interface{}, query firestore.Query) ([]interface{}, error) {
 	c.Query = query // replacing the embedded query
-	result := make([]interface{}, 0)
-	it := c.Documents(ctx)
-	for {
-		doc, err := it.Next()
-		if err == iterator.Done {
-			break
-		}
-		if err != nil {
-			return nil, err
-		}
-
-		if err := doc.DataTo(sample); err != nil {
-			return nil, err
-		}
-
-		result = append(result, sample)
-	}
-	return result, nil
+	return c.Retrieve(ctx, sample)
 }
