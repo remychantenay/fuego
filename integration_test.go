@@ -440,3 +440,46 @@ func TestIntegration_Document_Delete(t *testing.T) {
 		t.Fatalf(err.Error())
 	}
 }
+
+func TestIntegration_Document_Create_Many(t *testing.T) {
+	ctx := context.Background()
+
+	for i := 0; i < 800; i++ {
+		user := TestedStruct{
+			FirstName:    "John",
+			LastName:     "Smith",
+			EmailAddress: "jsmith@email.com",
+			Tokens: map[string]string{
+				"Android": "AND_123",
+				"IOS":     "IOS_123",
+			},
+			Address:    []string{"123 Street", "2nd Building"},
+			Age:        30,
+			LastSeenAt: time.Now(),
+			Premium:    false,
+		}
+
+		err := fuego.DocumentWithGeneratedID("users").Create(ctx, user)
+		if err != nil {
+			t.Fatalf(err.Error())
+		}
+	}
+}
+
+func TestIntegration_Collection_SetForAll(t *testing.T) {
+	ctx := context.Background()
+
+	err := fuego.Collection("users").SetForAll(ctx, "LastName", "Doe")
+	if err != nil {
+		t.Fatalf(err.Error())
+	}
+}
+
+func TestIntegration_Collection_DeleteAll(t *testing.T) {
+	ctx := context.Background()
+
+	err := fuego.Collection("users").DeleteAll(ctx)
+	if err != nil {
+		t.Fatalf(err.Error())
+	}
+}
