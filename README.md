@@ -17,7 +17,7 @@ Fuego does not do anything crazy or magic – its purpose is to reduce the amoun
 * Retrieving specific fields only
 * Simple Exists check
 * Collections and Queries
-* Array (append or override)
+* Array (append or override data)
 
 ### WIP
 * Maps
@@ -38,10 +38,11 @@ Bear in mind that the examples below are not including how to initialize Firebas
 import "github.com/remychantenay/fuego"
 
 type User struct {
-    FirstName       string `firestore:"FirstName"`
-    LastName        string `firestore:"LastName"`
-    EmailAddress    string `firestore:"EmailAddress"`
-    Address         string `firestore:"Address"`
+    FirstName       string              `firestore:"FirstName"`
+    LastName        string              `firestore:"LastName"`
+    EmailAddress    string              `firestore:"EmailAddress"`
+    Address         string              `firestore:"Address"`
+    Tokens          map[string]string   `firestore:"Tokens"`
 }
 
 func main() {
@@ -53,6 +54,9 @@ func main() {
         LastName:       "Smith",
         EmailAddress:   "jsmith@email.com",
         Address:        []string{"123 Street", "2nd Building"},
+        Tokens: map[string]string{
+			"Android": "cHzDGYfl5G8vnNCd9xQsbZ:APA...",
+		},
     }
 
     err := fuego.Document("users", "jsmith").Create(ctx, user)
@@ -87,35 +91,51 @@ value := fuego.Document("users", "jsmith").Exists(ctx)
 fmt.Println("Exists: ", value)
 ```
 
-### Fields
+### Field
 #### Retrieve
 At times, you may want to retrieve the value of only one field:
 ```go
-value, err := fuego.Document("users", "jsmith").Field("FirstName").Retrieve(ctx)
+value, err := fuego.Document("users", "jsmith").String("FirstName").Retrieve(ctx)
 if err != nil {
     panic(err.Error())
 }
 
-// Note the required type assertion
-fmt.Println("FirstName: ", value.(string)) // prints John
+fmt.Println("FirstName: ", value // prints: John
 ```
 
 #### Update
 Same goes for updating a specific field:
 ```go
-err := fuego.Document("users", "jsmith").Field("FirstName").Update(ctx, "Mike")
+err := fuego.Document("users", "jsmith").String("FirstName").Update(ctx, "Mike")
 if err != nil {
     panic(err.Error())
 }
 ```
 
-#### Update (Array)
-Fuego provides with different ways to update an array in a document.
+The example above shows how to retrieve and update a field of type `String` but other types are supported.
+
+### Arrays
+
+##### Retrieving
+```go
+values, err := fuego.Document("users", "jsmith").Array("Address").Retrieve(ctx)
+if err != nil {
+    panic(err.Error())
+}
+
+// Note the required type assertion
+fmt.Println("First Element: ", values[0].(string)) // prints: 123 Street
+```
+
+As you can see above, as an array can contain different types of data, type assertion is **required**.
+
+Fuego provides different ways to update an array in a document:
+
 ##### Appending
 ```go
 err := fuego.Document("users", "jsmith").
-    Field("Address").
-    AppendArray(ctx, []interface{}{"4th Floor"})
+    Array("Address").
+    Append(ctx, []interface{}{"4th Floor"})
 if err != nil {
     panic(err.Error())
 }
@@ -124,11 +144,45 @@ if err != nil {
 ##### Overriding
 ```go
 err := fuego.Document("users", "jsmith").
-    Field("Address").
-    OverrideArray(ctx, []interface{}{"4th Floor"})
+    Array("Address").
+    Override(ctx, []interface{}{"4th Floor"})
 if err != nil {
     panic(err.Error())
 }
+```
+
+### Maps
+
+##### Retrieving
+```go
+values, err := fuego.Document("users", "jsmith").Map("Tokens").Retrieve(ctx)
+if err != nil {
+    panic(err.Error())
+}
+
+// Note the required type assertion
+fmt.Println("Android Token: ", values["Android"].(string)) // prints: cHzDGYfl5G8vnNCd9xQsbZ:APA...
+```
+
+Just like with arrays, type assertion is **required** with maps.
+
+Fuego provides different ways to update a map in a document:
+
+##### Merging
+```go
+err := fuego.Document("users", "jsmith").
+    Map("Token").
+    Merge(ctx, map[string]interface{}{
+		"Android": "aVxDGYfl5G8vnNCd9xQsbZ:EPE...",
+	})
+if err != nil {
+    panic(err.Error())
+}
+```
+
+##### Overriding (TODO)
+```go
+TODO
 ```
 
 ### Collections

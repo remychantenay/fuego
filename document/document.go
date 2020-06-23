@@ -27,8 +27,20 @@ type Document interface {
 	// Delete removes a document from Firestore.
 	Delete(ctx context.Context) error
 
-	// Field returns a specific DocumentField.
-	Field(name string) DocumentField
+	// Array returns a specific Array field.
+	Array(name string) *Array
+
+	// String returns a specific String field.
+	String(name string) *String
+
+	// String returns a specific Number field.
+	Number(name string) *Number
+
+	// Map returns a specific Map field.
+	Map(name string) *Map
+
+	// Timestamp returns a specific Timestamp field.
+	Timestamp(name string) *Timestamp
 }
 
 // FirestoreDocument provides features related to Firestore documents.
@@ -113,11 +125,44 @@ func (d *FirestoreDocument) Delete(ctx context.Context) error {
 	return nil
 }
 
-// Field returns a new Field.
-func (d *FirestoreDocument) Field(name string) DocumentField {
-	return &Field{
+// Array returns a new Array.
+func (d *FirestoreDocument) Array(name string) *Array {
+	return &Array{
 		Document:  d,
 		Name:      name,
 		firestore: d.firestore,
+	}
+}
+
+// String returns a new String.
+func (d *FirestoreDocument) String(name string) *String {
+	return &String{
+		Document: d,
+		Name:     name,
+	}
+}
+
+// Number returns a new Number.
+func (d *FirestoreDocument) Number(name string) *Number {
+	return &Number{
+		Document: d,
+		Name:     name,
+	}
+}
+
+// Map returns a new Map.
+func (d *FirestoreDocument) Map(name string) *Map {
+	return &Map{
+		Document:  d,
+		Name:      name,
+		firestore: d.firestore,
+	}
+}
+
+// Timestamp returns a new Timestamp.
+func (d *FirestoreDocument) Timestamp(name string) *Timestamp {
+	return &Timestamp{
+		Document: d,
+		Name:     name,
 	}
 }
