@@ -1,13 +1,12 @@
 package fuego
 
 import (
-	"fmt"
-	"os"
-	"time"
-	//"cloud.google.com/go/firestore"
 	"context"
 	firebase "firebase.google.com/go"
+	"fmt"
+	"os"
 	"testing"
+	"time"
 )
 
 var fuego *Fuego
@@ -20,6 +19,7 @@ type TestedStruct struct {
 	Address      []string          `firestore:"Address"`
 	Age          int64             `firestore:"Age"`
 	LastSeenAt   time.Time         `firestore:"LastSeenAt"`
+	Premium      bool              `firestore:"Premium"`
 }
 
 func TestMain(m *testing.M) {
@@ -90,6 +90,7 @@ func TestIntegration_Document_Create(t *testing.T) {
 		Address:    []string{"123 Street", "2nd Building"},
 		Age:        30,
 		LastSeenAt: time.Now(),
+		Premium:    false,
 	}
 
 	err := fuego.Document("users", "jsmith").Create(ctx, user)
@@ -193,6 +194,45 @@ func TestIntegration_String_Update(t *testing.T) {
 	}
 
 	fmt.Println("New FirstName: ", value)
+}
+
+func TestIntegration_Boolean_Retrieve(t *testing.T) {
+	ctx := context.Background()
+
+	value, err := fuego.Document("users", "jsmith").
+		Boolean("Premium").
+		Retrieve(ctx)
+	if err != nil {
+		t.Fatalf(err.Error())
+	}
+
+	fmt.Println("Premium: ", value)
+}
+
+func TestIntegration_Boolean_Update(t *testing.T) {
+	ctx := context.Background()
+
+	expectedNewValue := true
+
+	err := fuego.Document("users", "jsmith").
+		Boolean("Premium").
+		Update(ctx, expectedNewValue)
+	if err != nil {
+		t.Fatalf(err.Error())
+	}
+
+	value, err := fuego.Document("users", "jsmith").
+		Boolean("Premium").
+		Retrieve(ctx)
+	if err != nil {
+		t.Fatalf(err.Error())
+	}
+
+	if value != expectedNewValue {
+		t.Fatalf("Got %t but expected %t", value, expectedNewValue)
+	}
+
+	fmt.Println("New Premium: ", value)
 }
 
 func TestIntegration_Number_Retrieve(t *testing.T) {

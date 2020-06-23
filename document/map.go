@@ -3,6 +3,7 @@ package document
 import (
 	"cloud.google.com/go/firestore"
 	"context"
+	"github.com/remychantenay/fuego/document/internal"
 )
 
 // MapField provides the necessary to interact with a Firestore document field of type Map.
@@ -31,21 +32,12 @@ type Map struct {
 
 // Retrieve returns the content of a specific field for a given document.
 func (m *Map) Retrieve(ctx context.Context) (map[string]interface{}, error) {
-	s, err := m.Document.GetDocumentRef().Get(ctx)
+	value, err := internal.RetrieveFieldValue(ctx, m.Document.GetDocumentRef(), m.Name)
 	if err != nil {
 		return nil, err
 	}
 
-	if !s.Exists() {
-		return nil, ErrDocumentNotExist
-	}
-
-	result, err := s.DataAt(m.Name)
-	if err != nil {
-		return nil, err
-	}
-
-	return result.(map[string]interface{}), nil
+	return value.(map[string]interface{}), nil
 }
 
 // Merge merges the value of a specific Map field.

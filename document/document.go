@@ -33,8 +33,11 @@ type Document interface {
 	// String returns a specific String field.
 	String(name string) *String
 
-	// String returns a specific Number field.
+	// Number returns a specific Number field.
 	Number(name string) *Number
+
+	// Boolean returns a specific Boolean field.
+	Boolean(name string) *Boolean
 
 	// Map returns a specific Map field.
 	Map(name string) *Map
@@ -145,6 +148,14 @@ func (d *FirestoreDocument) String(name string) *String {
 // Number returns a new Number.
 func (d *FirestoreDocument) Number(name string) *Number {
 	return &Number{
+		Document: d,
+		Name:     name,
+	}
+}
+
+// Boolean returns a new Boolean.
+func (d *FirestoreDocument) Boolean(name string) *Boolean {
+	return &Boolean{
 		Document: d,
 		Name:     name,
 	}

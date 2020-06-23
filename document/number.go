@@ -3,6 +3,7 @@ package document
 import (
 	"cloud.google.com/go/firestore"
 	"context"
+	"github.com/remychantenay/fuego/document/internal"
 )
 
 // NumberField provides the necessary to interact with a Firestore document field of type Number.
@@ -23,27 +24,18 @@ type Number struct {
 
 // Retrieve returns the content of a specific field for a given document.
 func (n *Number) Retrieve(ctx context.Context) (int64, error) {
-	snapshot, err := n.Document.GetDocumentRef().Get(ctx)
+	value, err := internal.RetrieveFieldValue(ctx, n.Document.GetDocumentRef(), n.Name)
 	if err != nil {
 		return 0, err
 	}
 
-	if !snapshot.Exists() {
-		return 0, ErrDocumentNotExist
-	}
-
-	result, err := snapshot.DataAt(n.Name)
-	if err != nil {
-		return 0, err
-	}
-
-	return result.(int64), nil
+	return value.(int64), nil
 }
 
 // Update updates the value of a specific field of type Number.
 func (n *Number) Update(ctx context.Context, with int64) error {
 
-	_, err := n.Document.GetDocumentRef().Set(ctx, map[string]interface{}{
+	_, err := n.Document.GetDocumentRef().Set(ctx, map[string]int64{
 		n.Name: with,
 	}, firestore.MergeAll)
 	return err

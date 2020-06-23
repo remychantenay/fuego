@@ -3,6 +3,7 @@ package document
 import (
 	"cloud.google.com/go/firestore"
 	"context"
+	"github.com/remychantenay/fuego/document/internal"
 	"time"
 )
 
@@ -30,16 +31,7 @@ type Timestamp struct {
 // location needs to be a value from the IANA Time Zone database (e.g. "America/Los_Angeles")
 // A time.Time zero value will be returned if an error occurs.
 func (t *Timestamp) Retrieve(ctx context.Context, location string) (time.Time, error) {
-	snapshot, err := t.Document.GetDocumentRef().Get(ctx)
-	if err != nil {
-		return time.Time{}, err
-	}
-
-	if !snapshot.Exists() {
-		return time.Time{}, ErrDocumentNotExist
-	}
-
-	result, err := snapshot.DataAt(t.Name)
+	value, err := internal.RetrieveFieldValue(ctx, t.Document.GetDocumentRef(), t.Name)
 	if err != nil {
 		return time.Time{}, err
 	}
@@ -48,7 +40,7 @@ func (t *Timestamp) Retrieve(ctx context.Context, location string) (time.Time, e
 	if err != nil {
 		return time.Time{}, err
 	}
-	return result.(time.Time).In(loc), nil
+	return value.(time.Time).In(loc), nil
 }
 
 // Update updates the value of a specific field of type Timestamp.
