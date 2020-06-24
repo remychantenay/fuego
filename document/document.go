@@ -32,8 +32,6 @@ type Document interface {
 	Array(name string) *Array
 
 	// String returns a specific String field.
-	//  fuego.Document("users", "jsmith").String("FirstName").Retrieve(ctx)
-	//  fuego.Document("users", "jsmith").String("FirstName").Update(ctx, "Jane")
 	String(name string) *String
 
 	// Number returns a specific Number field.
@@ -137,6 +135,8 @@ func (d *FirestoreDocument) Array(name string) *Array {
 }
 
 // String returns a new String.
+//  fuego.Document("users", "jsmith").String("FirstName").Retrieve(ctx)
+//  fuego.Document("users", "jsmith").String("FirstName").Update(ctx, "Jane")
 func (d *FirestoreDocument) String(name string) *String {
 	return &String{
 		Document: d,
