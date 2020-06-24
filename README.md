@@ -5,34 +5,35 @@
 [![GoDoc](https://godoc.org/github.com/remychantenay/fuego?status.svg)](https://godoc.org/github.com/remychantenay/fuego)
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
 
-Fuego is a Go client library for Google Firestore.
+Fuego is a Go client library for Google Firestore. It can be used in App Engine, Cloud Run, Google Cloud Functions and more.
 
-Fuego does not do anything crazy or magic – its purpose is to reduce the amount of boilerplate by abstracting the ceremony that comes with interacting with Firestore.
+It does not do anything crazy or magic – the purpose is to reduce the amount of boilerplate by hiding the ceremony that comes with interacting with Firestore.
+
+## Context
+While working on a project running on multiple services and serverless functions, I quickly realised that the amount of repetitive and boilerplate code related to Firestore increased exponentially.
+
+I decided to extract this code in a thin and layer on top of the Firestore admin client. That's how fuego came to life.
 
 ![Fuego](https://raw.githubusercontent.com/remychantenay/fuego/master/art/fuego.jpg)
 
 ## Features
-### Done
+### Documents
 * CRUD operations
 * Retrieving specific fields only
 * Simple Exists check
-* Collections and Queries
-* Array (append or override data)
 
-### WIP
-* Maps
-
-### TODO
-* Write Batches
+### Collections
+* Batch processing (update field for all, delete all, etc.)
+* Better flexibility with Arrays and Maps (append/merge or override data)
 
 ## Usage
 ### Import
 ```bash
-go get -u github.com/remychantenay/fuego
+go get github.com/remychantenay/fuego
 ```
 
 ### Document
-Bear in mind that the examples below are not including how to initialize Firebase and the Firestore client. You will find this information in Firebase's documentation.
+Bear in mind that the examples below are not including how to initialize Firebase and nor create the Firestore client. Check Firebase's documentation for more info.
 #### Create
 ```go
 import "github.com/remychantenay/fuego"
@@ -97,7 +98,7 @@ At times, you may want to retrieve the value of only one field:
 ```go
 value, err := fuego.Document("users", "jsmith").String("FirstName").Retrieve(ctx)
 if err != nil {
-    panic(err.Error())
+    panic(err)
 }
 
 fmt.Println("FirstName: ", value // prints: John
@@ -108,19 +109,18 @@ Same goes for updating a specific field:
 ```go
 err := fuego.Document("users", "jsmith").String("FirstName").Update(ctx, "Mike")
 if err != nil {
-    panic(err.Error())
+    panic(err)
 }
 ```
 
 The example above shows how to retrieve and update a field of type `String` but other types are supported.
 
 ### Arrays
-
 ##### Retrieving
 ```go
 values, err := fuego.Document("users", "jsmith").Array("Address").Retrieve(ctx)
 if err != nil {
-    panic(err.Error())
+    panic(err)
 }
 
 // Note the required type assertion
@@ -137,7 +137,7 @@ err := fuego.Document("users", "jsmith").
     Array("Address").
     Append(ctx, []interface{}{"4th Floor"})
 if err != nil {
-    panic(err.Error())
+    panic(err)
 }
 ```
 
@@ -147,7 +147,7 @@ err := fuego.Document("users", "jsmith").
     Array("Address").
     Override(ctx, []interface{}{"4th Floor"})
 if err != nil {
-    panic(err.Error())
+    panic(err)
 }
 ```
 
@@ -157,7 +157,7 @@ if err != nil {
 ```go
 values, err := fuego.Document("users", "jsmith").Map("Tokens").Retrieve(ctx)
 if err != nil {
-    panic(err.Error())
+    panic(err)
 }
 
 // Note the required type assertion
@@ -176,7 +176,7 @@ err := fuego.Document("users", "jsmith").
 		"Android": "aVxDGYfl5G8vnNCd9xQsbZ:EPE...",
 	})
 if err != nil {
-    panic(err.Error())
+    panic(err)
 }
 ```
 
@@ -191,7 +191,7 @@ Retrieving all the documents in a collection is straight-forward:
 ```go
 users, err := fuego.Collection("users").Retrieve(ctx, &User{})
 if err != nil {
-    panic(err.Error())
+    panic(err)
 }
 
 // Note the required type assertion
@@ -199,29 +199,27 @@ fmt.Println("FirstName: ", users[0].(*User).FirstName) // prints John
 ```
 
 #### Query
-When it comes to performing more complex queries, it just works like the firestore client. Fuego's collection struct embeds a `firestore.Query`. This allow to directly use its methods:
+When it comes to performing more complex queries, it just works like the firestore client. Fuego's collection struct embeds a [firestore.Query](https://firebase.google.com/docs/firestore/query-data/queries). This allow to directly use its methods:
 ```go
 collection := fuego.Collection("users")
 query := collection.Where("FirstName", "==", "John").Limit(50)
 users, err := collection.RetrieveWith(ctx, &User{}, query)
 if err != nil {
-    panic(err.Error())
+    panic(err)
 }
 
 // Note the required type assertion
 fmt.Println("FirstName: ", users[0].(*User).FirstName) // prints John
 ```
 
-More info [here](https://firebase.google.com/docs/firestore/query-data/queries) on how to use queries.
+## More Reading
+The [doc](https://godoc.org/github.com/remychantenay/fuego) contains examples for more use cases.
 
-## Transitive Dependencies
+## Dependencies
 * Firebase: `firebase.google.com/go`
 * Firestore: `cloud.google.com/go/firestore`
 
 More info [here](https://godoc.org/github.com/remychantenay/fuego?imports)
-
-## Resources
-[google-cloud-go on GitHub](https://github.com/googleapis/google-cloud-go/tree/master/firestore)
 
 ## License
 Apache License Version 2.0

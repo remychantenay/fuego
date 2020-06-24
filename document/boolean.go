@@ -23,6 +23,7 @@ type Boolean struct {
 }
 
 // Retrieve returns the content of a specific field for a given document.
+//  val, err := fuego.Document("users", "jsmith").Boolean("Premium").Retrieve(ctx)
 func (b *Boolean) Retrieve(ctx context.Context) (bool, error) {
 	value, err := internal.RetrieveFieldValue(ctx, b.Document.GetDocumentRef(), b.Name)
 	if err != nil {
@@ -33,6 +34,7 @@ func (b *Boolean) Retrieve(ctx context.Context) (bool, error) {
 }
 
 // Update updates the value of a specific field of type Boolean.
+//  err := fuego.Document("users", "jsmith").Boolean("Premium").Update(ctx, true)
 func (b *Boolean) Update(ctx context.Context, with bool) error {
 
 	_, err := b.Document.GetDocumentRef().Set(ctx, map[string]bool{

@@ -53,6 +53,7 @@ func New(fs *firestore.Client, path string) *FirestoreCollection {
 }
 
 // Retrieve retrieve all the documents from a collection.
+//  values, err := fuego.Collection("users").Retrieve(ctx, &User{})
 func (c *FirestoreCollection) Retrieve(ctx context.Context, sample interface{}) ([]interface{}, error) {
 	result := make([]interface{}, 0)
 	it := c.Documents(ctx)
@@ -75,12 +76,14 @@ func (c *FirestoreCollection) Retrieve(ctx context.Context, sample interface{}) 
 }
 
 // RetrieveWith retrieve documents from a collection using the provided Query.
+//  values, err := fuego.Collection("users").RetrieveWith(ctx, &User{}, query)
 func (c *FirestoreCollection) RetrieveWith(ctx context.Context, sample interface{}, query firestore.Query) ([]interface{}, error) {
 	c.Query = query // replacing the embedded query
 	return c.Retrieve(ctx, sample)
 }
 
 // SetForAll will set a field with a given value for ALL documents in the collection.
+//  err := fuego.Collection("users").SetForAll(ctx, "NewField", "NewValue")
 func (c *FirestoreCollection) SetForAll(ctx context.Context, fieldName string, fieldValue interface{}) error {
 	it := c.Ref.DocumentRefs(ctx)
 	documentRefs, err := it.GetAll()
@@ -127,6 +130,7 @@ func (c *FirestoreCollection) SetForAll(ctx context.Context, fieldName string, f
 }
 
 // DeleteAll removes all items from the collection.
+//  err := fuego.Collection("users").DeleteAll(ctx)
 func (c *FirestoreCollection) DeleteAll(ctx context.Context) error {
 	it := c.Ref.DocumentRefs(ctx)
 	documentRefs, err := it.GetAll()

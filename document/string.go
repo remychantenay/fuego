@@ -23,6 +23,7 @@ type String struct {
 }
 
 // Retrieve returns the content of a specific field for a given document.
+//  str, err := fuego.Document("users", "jsmith").String("FirstName").Retrieve(ctx)
 func (s *String) Retrieve(ctx context.Context) (string, error) {
 	value, err := internal.RetrieveFieldValue(ctx, s.Document.GetDocumentRef(), s.Name)
 	if err != nil {
@@ -33,6 +34,7 @@ func (s *String) Retrieve(ctx context.Context) (string, error) {
 }
 
 // Update updates the value of a specific field of type String.
+//  err := fuego.Document("users", "jsmith").String("FirstName").Update(ctx, "Jane")
 func (s *String) Update(ctx context.Context, with string) error {
 
 	_, err := s.Document.GetDocumentRef().Set(ctx, map[string]string{
