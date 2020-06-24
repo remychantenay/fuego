@@ -88,7 +88,7 @@ func TestIntegration_Document_Create(t *testing.T) {
 			"IOS":     "IOS_123",
 		},
 		Address:    []string{"123 Street", "2nd Building"},
-		Age:        30,
+		Age:        29,
 		LastSeenAt: time.Now(),
 		Premium:    false,
 	}

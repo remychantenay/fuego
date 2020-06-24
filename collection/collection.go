@@ -1,3 +1,4 @@
+// Package collection provides generic methods to interact with Firestore collections.
 package collection
 
 import (

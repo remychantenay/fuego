@@ -1,3 +1,4 @@
+// Package document provides generic methods to interact with Firestore documents.
 package document
 
 import (
@@ -11,10 +12,10 @@ type Document interface {
 	// GetDocumentRef returns a Document Reference (DocumentRef).
 	GetDocumentRef() *firestore.DocumentRef
 
-	// Create creates a document.
+	// Create a document.
 	Create(ctx context.Context, from interface{}) error
 
-	// Retrieve populate the destination passed as argument.
+	// Retrieve populate the destination passed as parameter.
 	//
 	// note: the `to` parameter has to be a pointer.
 	Retrieve(ctx context.Context, to interface{}) error
@@ -31,6 +32,8 @@ type Document interface {
 	Array(name string) *Array
 
 	// String returns a specific String field.
+	//  fuego.Document("users", "jsmith").String("FirstName").Retrieve(ctx)
+	//  fuego.Document("users", "jsmith").String("FirstName").Update(ctx, "Jane")
 	String(name string) *String
 
 	// Number returns a specific Number field.
@@ -107,11 +110,7 @@ func (d *FirestoreDocument) Retrieve(ctx context.Context, to interface{}) error 
 // Exists returns true if a given document exists, false otherwise.
 func (d *FirestoreDocument) Exists(ctx context.Context) bool {
 	s, err := d.GetDocumentRef().Get(ctx)
-	if err != nil {
-		return false
-	}
-
-	if !s.Exists() {
+	if err != nil || !s.Exists() {
 		return false
 	}
 
