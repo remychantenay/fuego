@@ -9,9 +9,6 @@ import (
 // Document provides the necessary to interact with a Firestore document.
 type Document interface {
 
-	// GetDocumentRef returns a Document Reference (DocumentRef).
-	GetDocumentRef() *firestore.DocumentRef
-
 	// Create a document.
 	Create(ctx context.Context, from interface{}) error
 
@@ -45,6 +42,15 @@ type Document interface {
 
 	// Timestamp returns a specific Timestamp field.
 	Timestamp(name string) *Timestamp
+
+	// GetDocumentRef returns a Document Reference (DocumentRef).
+	GetDocumentRef() *firestore.DocumentRef
+
+	// InBatch returns true if a WriteBatch has been started, false otherwise.
+	InBatch() bool
+
+	// Batch returns the pointer to the WriteBatch (if any), nil oherwise.
+	Batch() *firestore.WriteBatch
 }
 
 // FirestoreDocument provides features related to Firestore documents.
@@ -56,16 +62,20 @@ type FirestoreDocument struct {
 	// ID is the ID of the document
 	ID string
 
+	// writeBatch will be nil if not started with fuego.StartBatch() or cancelled with fuego.CancelBatch().
+	writeBatch *firestore.WriteBatch
+
 	firestore *firestore.Client
 }
 
 // New creates and returns a new FirestoreDocument.
-func New(fs *firestore.Client, path, documentID string) *FirestoreDocument {
+func New(fs *firestore.Client, path, documentID string, wb *firestore.WriteBatch) *FirestoreDocument {
 	r := fs.Collection(path)
 	return &FirestoreDocument{
-		ColRef:    r,
-		ID:        documentID,
-		firestore: fs,
+		ColRef:     r,
+		ID:         documentID,
+		firestore:  fs,
+		writeBatch: wb,
 	}
 }
 
@@ -81,7 +91,12 @@ func (d *FirestoreDocument) GetDocumentRef() *firestore.DocumentRef {
 
 // Create a document in Firestore.
 func (d *FirestoreDocument) Create(ctx context.Context, from interface{}) error {
-	_, err := d.GetDocumentRef().Set(ctx, from)
+	ref := d.GetDocumentRef()
+	if d.InBatch() {
+		d.Batch().Set(ref, from)
+		return nil
+	}
+	_, err := ref.Set(ctx, from)
 	return err
 }
 
@@ -117,7 +132,12 @@ func (d *FirestoreDocument) Exists(ctx context.Context) bool {
 
 // Delete removes a document from Firestore.
 func (d *FirestoreDocument) Delete(ctx context.Context) error {
-	_, err := d.GetDocumentRef().Delete(ctx)
+	ref := d.GetDocumentRef()
+	if d.InBatch() {
+		d.Batch().Delete(ref)
+		return nil
+	}
+	_, err := ref.Delete(ctx)
 	if err != nil {
 		return err
 	}
@@ -145,8 +165,9 @@ func (d *FirestoreDocument) String(name string) *String {
 // Number returns a new Number.
 func (d *FirestoreDocument) Number(name string) *Number {
 	return &Number{
-		Document: d,
-		Name:     name,
+		Document:  d,
+		Name:      name,
+		firestore: d.firestore,
 	}
 }
 
@@ -173,4 +194,14 @@ func (d *FirestoreDocument) Timestamp(name string) *Timestamp {
 		Document: d,
 		Name:     name,
 	}
+}
+
+// InBatch returns true if a WriteBatch has been started, false otherwise.
+func (d *FirestoreDocument) InBatch() bool {
+	return d.writeBatch != nil
+}
+
+// Batch returns the pointer to the WriteBatch (if any), nil oherwise.
+func (d *FirestoreDocument) Batch() *firestore.WriteBatch {
+	return d.writeBatch
 }

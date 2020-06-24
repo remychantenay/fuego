@@ -52,7 +52,7 @@ func (a *Array) Override(ctx context.Context, data []interface{}) error {
 
 // Append will append the provided data to the existing data (if any) of an Array field.
 //
-// The update will be done inside a transaction as we need to read the value beforehand.
+// The update will be executed inside a transaction.
 //  values, err := fuego.Document("users", "jsmith").Array("Address").Append(ctx, []interface{}{"More info"})
 func (a *Array) Append(ctx context.Context, data []interface{}) error {
 

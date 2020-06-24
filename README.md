@@ -12,14 +12,14 @@ It does not do anything crazy or magic – the purpose is to reduce the amount o
 ## Context
 While working on a project running on multiple services and serverless functions, I quickly realised that the amount of repetitive and boilerplate code related to Firestore increased exponentially.
 
-I decided to extract this code in a thin and layer on top of the Firestore admin client. That's how fuego came to life.
+I decided to extract this code in a thin layer on top of the Firestore admin client. That's how fuego came to life.
 
 ![Fuego](https://raw.githubusercontent.com/remychantenay/fuego/master/art/fuego.jpg)
 
 ## Features
 ### Documents
 * CRUD operations
-* Retrieving specific fields only
+* Retrieving/Updating specific fields only
 * Simple Exists check
 
 ### Collections

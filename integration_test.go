@@ -274,6 +274,58 @@ func TestIntegration_Number_Update(t *testing.T) {
 	fmt.Println("New Age: ", value)
 }
 
+func TestIntegration_Number_Increment(t *testing.T) {
+	ctx := context.Background()
+
+	expectedNewValue := int64(32)
+
+	err := fuego.Document("users", "jsmith").
+		Number("Age").
+		Increment(ctx)
+	if err != nil {
+		t.Fatalf(err.Error())
+	}
+
+	value, err := fuego.Document("users", "jsmith").
+		Number("Age").
+		Retrieve(ctx)
+	if err != nil {
+		t.Fatalf(err.Error())
+	}
+
+	if value != expectedNewValue {
+		t.Fatalf("Got %d but expected %d", value, expectedNewValue)
+	}
+
+	fmt.Println("Incremented Age: ", value)
+}
+
+func TestIntegration_Number_Decrement(t *testing.T) {
+	ctx := context.Background()
+
+	expectedNewValue := int64(31)
+
+	err := fuego.Document("users", "jsmith").
+		Number("Age").
+		Decrement(ctx)
+	if err != nil {
+		t.Fatalf(err.Error())
+	}
+
+	value, err := fuego.Document("users", "jsmith").
+		Number("Age").
+		Retrieve(ctx)
+	if err != nil {
+		t.Fatalf(err.Error())
+	}
+
+	if value != expectedNewValue {
+		t.Fatalf("Got %d but expected %d", value, expectedNewValue)
+	}
+
+	fmt.Println("Decremented Age: ", value)
+}
+
 func TestIntegration_Timestamp_Retrieve(t *testing.T) {
 	ctx := context.Background()
 

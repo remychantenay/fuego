@@ -2,29 +2,56 @@ package fuego
 
 import (
 	"cloud.google.com/go/firestore"
+	"context"
 	"github.com/remychantenay/fuego/collection"
 	"github.com/remychantenay/fuego/document"
 	"strings"
 )
 
-// Fuego is a wrapper for the Firestore client
-// It contains the Firestore client
+// Fuego is a wrapper for the Firestore client.
+// Contains the Firestore client.
 type Fuego struct {
-	firestore *firestore.Client
+
+	// FirestoreClient is a ptr to a firestore client.
+	FirestoreClient *firestore.Client
+
+	// WriteBatch is a ptr to a writebatch.
+	// will be nil if not started with StartBatch() or cancelled with CancelBatch().
+	WriteBatch *firestore.WriteBatch
 }
 
-// New creates and returns a Fuego wrapper
-func New(fc *firestore.Client) *Fuego {
+// New creates and returns a Fuego wrapper.
+func New(fs *firestore.Client) *Fuego {
 	return &Fuego{
-		firestore: fc,
+		FirestoreClient: fs,
+		WriteBatch:      nil,
 	}
+}
+
+// StartBatch starts a write batch.
+// Write operations that follow will be added to the batch and processed when CommitBatch is called.
+func (f *Fuego) StartBatch() {
+	f.WriteBatch = f.FirestoreClient.Batch()
+}
+
+// CommitBatch commits the write batch previously started with StartBatch().
+func (f *Fuego) CommitBatch(ctx context.Context) ([]*firestore.WriteResult, error) {
+	if f.WriteBatch == nil {
+		return nil, ErrBatchWriteNotStarted
+	}
+	return f.WriteBatch.Commit(ctx)
+}
+
+// CancelBatch cancels an on-going write batch (if any).
+func (f *Fuego) CancelBatch() {
+	f.WriteBatch = nil
 }
 
 // Document returns a new FirestoreDocument.
 func (f *Fuego) Document(path, documentID string) *document.FirestoreDocument {
 	path = strings.TrimPrefix(path, "/")
 	path = strings.TrimSuffix(path, "/")
-	return document.New(f.firestore, path, documentID)
+	return document.New(f.FirestoreClient, path, documentID, f.WriteBatch)
 }
 
 // DocumentWithGeneratedID returns a new FirestoreDocument without ID.
@@ -36,5 +63,5 @@ func (f *Fuego) DocumentWithGeneratedID(path string) *document.FirestoreDocument
 func (f *Fuego) Collection(path string) *collection.FirestoreCollection {
 	path = strings.TrimPrefix(path, "/")
 	path = strings.TrimSuffix(path, "/")
-	return collection.New(f.firestore, path)
+	return collection.New(f.FirestoreClient, path)
 }
