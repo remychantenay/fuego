@@ -33,12 +33,21 @@ I decided to extract this code in a thin layer on top of the Firestore admin cli
 go get github.com/remychantenay/fuego
 ```
 
-### Document
-Bear in mind that the examples below are not including how to initialize Firebase and nor create the Firestore client. Check Firebase's documentation for more info.
-#### Create
+### Set Up
 ```go
 import "github.com/remychantenay/fuego"
 
+func main() {
+    fuegoClient := fuego.New(firestoreClient) // firestoreClient needs to be created beforehand.
+    /// Your code here...
+}
+```
+
+### Document
+Bear in mind that the examples below are not including how to initialize Firebase and nor create the Firestore client. Check Firebase's documentation for more info.
+
+#### Create
+```go
 type User struct {
     FirstName       string              `firestore:"FirstName"`
     LastName        string              `firestore:"LastName"`
@@ -48,170 +57,53 @@ type User struct {
 }
 
 func main() {
-
-    fuego := New(firestoreClient) // firestoreClient needs to be created beforehand.
-        
     user := User{
         FirstName:      "John",
         LastName:       "Smith",
         EmailAddress:   "jsmith@email.com",
         Address:        []string{"123 Street", "2nd Building"},
         Tokens: map[string]string{
-			"Android": "cHzDGYfl5G8vnNCd9xQsbZ:APA...",
-		},
+            "Android": "cHzDGYfl5G8vnNCd9xQsbZ:APA...",
+        },
     }
 
-    err := fuego.Document("users", "jsmith").Create(ctx, user)
+    err := fuegoClient.Document("users", "jsmith").Create(ctx, user)
     if err != nil {
-        panic(err.Error())
-    }
-
-    // Or if you wish to let Firestore generate an ID for you:
-    err := fuego.DocumentWithGeneratedID("users").Create(ctx, user)
-    if err != nil {
-        panic(err.Error())
+        panic(err)
     }
 }
 ```
 #### Retrieve
 ```go
 user := User{}
-err := fuego.Document("users", "jsmith").Retrieve(ctx, &user)
+err := fuegoClient.Document("users", "jsmith").Retrieve(ctx, &user)
 if err != nil {
-    panic(err.Error())
+    panic(err)
 }
 
-fmt.Println("LastName: ", user.FirstName) // prints Smith
+fmt.Println("LastName: ", user.LastName) // prints: Smith
 ```
 
 #### Exists
 You also may want to only check if a given document exists without providing a struct:
 ```go
 // Note: false will be returned if an error occurs as well
-value := fuego.Document("users", "jsmith").Exists(ctx)
-
+value := fuegoClient.Document("users", "jsmith").Exists(ctx)
 fmt.Println("Exists: ", value)
 ```
 
-### Field
-#### Retrieve
-At times, you may want to retrieve the value of only one field:
-```go
-value, err := fuego.Document("users", "jsmith").String("FirstName").Retrieve(ctx)
-if err != nil {
-    panic(err)
-}
-
-fmt.Println("FirstName: ", value // prints: John
-```
-
-#### Update
-Same goes for updating a specific field:
-```go
-err := fuego.Document("users", "jsmith").String("FirstName").Update(ctx, "Mike")
-if err != nil {
-    panic(err)
-}
-```
-
-The example above shows how to retrieve and update a field of type `String` but other types are supported.
-
-### Arrays
-##### Retrieving
-```go
-values, err := fuego.Document("users", "jsmith").Array("Address").Retrieve(ctx)
-if err != nil {
-    panic(err)
-}
-
-// Note the required type assertion
-fmt.Println("First Element: ", values[0].(string)) // prints: 123 Street
-```
-
-As you can see above, as an array can contain different types of data, type assertion is **required**.
-
-Fuego provides different ways to update an array in a document:
-
-##### Appending
-```go
-err := fuego.Document("users", "jsmith").
-    Array("Address").
-    Append(ctx, []interface{}{"4th Floor"})
-if err != nil {
-    panic(err)
-}
-```
-
-##### Overriding
-```go
-err := fuego.Document("users", "jsmith").
-    Array("Address").
-    Override(ctx, []interface{}{"4th Floor"})
-if err != nil {
-    panic(err)
-}
-```
-
-### Maps
-
-##### Retrieving
-```go
-values, err := fuego.Document("users", "jsmith").Map("Tokens").Retrieve(ctx)
-if err != nil {
-    panic(err)
-}
-
-// Note the required type assertion
-fmt.Println("Android Token: ", values["Android"].(string)) // prints: cHzDGYfl5G8vnNCd9xQsbZ:APA...
-```
-
-Just like with arrays, type assertion is **required** with maps.
-
-Fuego provides different ways to update a map in a document:
-
-##### Merging
-```go
-err := fuego.Document("users", "jsmith").
-    Map("Token").
-    Merge(ctx, map[string]interface{}{
-		"Android": "aVxDGYfl5G8vnNCd9xQsbZ:EPE...",
-	})
-if err != nil {
-    panic(err)
-}
-```
-
-##### Overriding (TODO)
-```go
-TODO
-```
+Please read the [doc](https://godoc.org/github.com/remychantenay/fuego/document) to see all the documents related operations.
 
 ### Collections
-#### Retrieve
-Retrieving all the documents in a collection is straight-forward:
-```go
-users, err := fuego.Collection("users").Retrieve(ctx, &User{})
-if err != nil {
-    panic(err)
-}
+Below the list of operations available for collections (read the doc for more details):
+| Operation | Description | Additional Information |
+| ------ | ------ | ------ |
+| Retrieve | Retrieve all documents from a collection. | |
+| RetrieveWith | Retrieve documents from a collection (if they meet the criteras). | Uses firestore.Query. |
+| SetForAll | Set a field value for all documents in the collection | Uses Write Batches. |
+| DeleteAll | Removes all documents from a collection. | Uses Write Batches. |
 
-// Note the required type assertion
-fmt.Println("FirstName: ", users[0].(*User).FirstName) // prints John
-```
-
-#### Query
-When it comes to performing more complex queries, it just works like the firestore client. Fuego's collection struct embeds a [firestore.Query](https://firebase.google.com/docs/firestore/query-data/queries). This allow to directly use its methods:
-```go
-collection := fuego.Collection("users")
-query := collection.Where("FirstName", "==", "John").Limit(50)
-users, err := collection.RetrieveWith(ctx, &User{}, query)
-if err != nil {
-    panic(err)
-}
-
-// Note the required type assertion
-fmt.Println("FirstName: ", users[0].(*User).FirstName) // prints John
-```
+Please read the [doc](https://godoc.org/github.com/remychantenay/fuego/collection) to see all the collections related operations.
 
 ### Write Batches
 Write Batches allow to group writes together to avoid multiple round trips. They are **NOT** transactions.
@@ -219,21 +111,18 @@ More info [here](https://firebase.google.com/docs/firestore/manage-data/transact
 
 **IMPORTANT**: not all operations are compatible with Write Batches.
 ```go
-fuego.StartBatch()
+fuegoClient.StartBatch()
 
-// All supported operations executed between here and commit will be batched.
-fuego.Document("users", "jsmith").Number("Age").Update(33)
-fuego.Document("users", "jdoe").String("FirstName").Update("Jane")
-fuego.Document("users", "jdoe").Boolean("Premium").Update(true)
+// All **supported** operations executed between here and commit will be batched.
+fuegoClient.Document("users", "jsmith").Number("Age").Update(33)
+fuegoClient.Document("users", "enorton").String("FirstName").Update("Eddy")
+fuegoClient.Document("users", "jdoe").Boolean("Premium").Update(true)
 
-wr, err := fuego.CommitBatch(ctx)
+wr, err := fuegoClient.CommitBatch(ctx)
 if err != nil {
     panic(err)
 }
 ```
-
-## More Reading
-The [doc](https://godoc.org/github.com/remychantenay/fuego) contains examples for more use cases.
 
 ## Dependencies
 * Firebase: `firebase.google.com/go`
