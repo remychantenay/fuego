@@ -21,6 +21,7 @@ I decided to extract this code in a thin layer on top of the Firestore admin cli
 * CRUD operations
 * Retrieving/Updating specific fields only
 * Simple Exists check
+* Write Batches
 
 ### Collections
 * Batch processing (update field for all, delete all, etc.)
@@ -210,6 +211,25 @@ if err != nil {
 
 // Note the required type assertion
 fmt.Println("FirstName: ", users[0].(*User).FirstName) // prints John
+```
+
+### Write Batches
+Write Batches allow to group writes together to avoid multiple round trips. They are **NOT** transactions.
+More info [here](https://firebase.google.com/docs/firestore/manage-data/transactions).
+
+**IMPORTANT**: not all operations are compatible with Write Batches.
+```go
+fuego.StartBatch()
+
+// All supported operations executed between here and commit will be batched.
+fuego.Document("users", "jsmith").Number("Age").Update(33)
+fuego.Document("users", "jdoe").String("FirstName").Update("Jane")
+fuego.Document("users", "jdoe").Boolean("Premium").Update(true)
+
+wr, err := fuego.CommitBatch(ctx)
+if err != nil {
+    panic(err)
+}
 ```
 
 ## More Reading

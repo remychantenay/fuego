@@ -18,14 +18,18 @@ type BooleanField interface {
 
 // Boolean represents a document field of type Boolean.
 type Boolean struct {
+
+	// Document is the underlying document (incl. ID and ref).
 	Document Document
-	Name     string
+
+	// Name is the name of the field.
+	Name string
 }
 
 // Retrieve returns the content of a specific field for a given document.
 //  val, err := fuego.Document("users", "jsmith").Boolean("Premium").Retrieve(ctx)
-func (b *Boolean) Retrieve(ctx context.Context) (bool, error) {
-	value, err := internal.RetrieveFieldValue(ctx, b.Document.GetDocumentRef(), b.Name)
+func (f *Boolean) Retrieve(ctx context.Context) (bool, error) {
+	value, err := internal.RetrieveFieldValue(ctx, f.Document.GetDocumentRef(), f.Name)
 	if err != nil {
 		return false, err
 	}
@@ -35,10 +39,18 @@ func (b *Boolean) Retrieve(ctx context.Context) (bool, error) {
 
 // Update updates the value of a specific field of type Boolean.
 //  err := fuego.Document("users", "jsmith").Boolean("Premium").Update(ctx, true)
-func (b *Boolean) Update(ctx context.Context, with bool) error {
+func (f *Boolean) Update(ctx context.Context, with bool) error {
 
-	_, err := b.Document.GetDocumentRef().Set(ctx, map[string]bool{
-		b.Name: with,
-	}, firestore.MergeAll)
+	ref := f.Document.GetDocumentRef()
+	m := map[string]bool{
+		f.Name: with,
+	}
+
+	if f.Document.InBatch() {
+		f.Document.Batch().Set(ref, m, firestore.MergeAll)
+		return nil
+	}
+
+	_, err := ref.Set(ctx, m, firestore.MergeAll)
 	return err
 }

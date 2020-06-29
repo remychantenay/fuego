@@ -24,16 +24,20 @@ type ArrayField interface {
 
 // Array represents a document field of type Array.
 type Array struct {
+
+	// Document is the underlying document (incl. ID and ref).
 	Document Document
-	Name     string
+
+	// Name is the name of the field.
+	Name string
 
 	firestore *firestore.Client
 }
 
 // Retrieve returns the content of a specific field for a given document.
 //  values, err := fuego.Document("users", "jsmith").Array("Address").Retrieve(ctx)
-func (a *Array) Retrieve(ctx context.Context) ([]interface{}, error) {
-	value, err := internal.RetrieveFieldValue(ctx, a.Document.GetDocumentRef(), a.Name)
+func (f *Array) Retrieve(ctx context.Context) ([]interface{}, error) {
+	value, err := internal.RetrieveFieldValue(ctx, f.Document.GetDocumentRef(), f.Name)
 	if err != nil {
 		return nil, err
 	}
@@ -43,10 +47,19 @@ func (a *Array) Retrieve(ctx context.Context) ([]interface{}, error) {
 
 // Override will override the existing data (if any) of an Array field.
 //  values, err := fuego.Document("users", "jsmith").Array("Address").Override(ctx, []interface{}{"New Street", "New Building"})
-func (a *Array) Override(ctx context.Context, data []interface{}) error {
-	_, err := a.Document.GetDocumentRef().Set(ctx, map[string]interface{}{
-		a.Name: data,
-	}, firestore.MergeAll)
+func (f *Array) Override(ctx context.Context, data []interface{}) error {
+
+	ref := f.Document.GetDocumentRef()
+	m := map[string]interface{}{
+		f.Name: data,
+	}
+
+	if f.Document.InBatch() {
+		f.Document.Batch().Set(ref, m, firestore.MergeAll)
+		return nil
+	}
+
+	_, err := ref.Set(ctx, m, firestore.MergeAll)
 	return err
 }
 
@@ -54,24 +67,24 @@ func (a *Array) Override(ctx context.Context, data []interface{}) error {
 //
 // The update will be executed inside a transaction.
 //  values, err := fuego.Document("users", "jsmith").Array("Address").Append(ctx, []interface{}{"More info"})
-func (a *Array) Append(ctx context.Context, data []interface{}) error {
+func (f *Array) Append(ctx context.Context, data []interface{}) error {
 
-	return a.firestore.RunTransaction(ctx, func(ctx context.Context, tx *firestore.Transaction) error {
+	return f.firestore.RunTransaction(ctx, func(ctx context.Context, tx *firestore.Transaction) error {
 
-		document, err := tx.Get(a.Document.GetDocumentRef())
+		document, err := tx.Get(f.Document.GetDocumentRef())
 		if err != nil {
 			return err
 		}
 
-		value, err := document.DataAt(a.Name)
+		value, err := document.DataAt(f.Name)
 		if err != nil {
 			return err
 		}
 
 		value = append(value.([]interface{}), data...)
 
-		err = tx.Set(a.Document.GetDocumentRef(), map[string]interface{}{
-			a.Name: value,
+		err = tx.Set(f.Document.GetDocumentRef(), map[string]interface{}{
+			f.Name: value,
 		}, firestore.MergeAll)
 		if err != nil {
 			return err

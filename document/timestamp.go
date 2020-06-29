@@ -22,8 +22,12 @@ type TimestampField interface {
 
 // Timestamp represents a document field of type Timestamp.
 type Timestamp struct {
+
+	// Document is the underlying document (incl. ID and ref).
 	Document Document
-	Name     string
+
+	// Name is the name of the field.
+	Name string
 }
 
 // Retrieve returns the content of a specific field for a given document.
@@ -31,8 +35,8 @@ type Timestamp struct {
 // location needs to be a value from the IANA Time Zone database
 // A time.Time zero value will be returned if an error occurs.
 //  val, err := fuego.Document("users", "jsmith").Timestamp("LastSeenAt").Retrieve(ctx, "America/Los_Angeles")
-func (t *Timestamp) Retrieve(ctx context.Context, location string) (time.Time, error) {
-	value, err := internal.RetrieveFieldValue(ctx, t.Document.GetDocumentRef(), t.Name)
+func (f *Timestamp) Retrieve(ctx context.Context, location string) (time.Time, error) {
+	value, err := internal.RetrieveFieldValue(ctx, f.Document.GetDocumentRef(), f.Name)
 	if err != nil {
 		return time.Time{}, err
 	}
@@ -46,10 +50,18 @@ func (t *Timestamp) Retrieve(ctx context.Context, location string) (time.Time, e
 
 // Update updates the value of a specific field of type Timestamp.
 //  err := fuego.Document("users", "jsmith").Timestamp("LastSeenAt").Update(ctx, time.Now())
-func (t *Timestamp) Update(ctx context.Context, with time.Time) error {
+func (f *Timestamp) Update(ctx context.Context, with time.Time) error {
 
-	_, err := t.Document.GetDocumentRef().Set(ctx, map[string]interface{}{
-		t.Name: with,
-	}, firestore.MergeAll)
+	ref := f.Document.GetDocumentRef()
+	m := map[string]interface{}{
+		f.Name: with,
+	}
+
+	if f.Document.InBatch() {
+		f.Document.Batch().Set(ref, m, firestore.MergeAll)
+		return nil
+	}
+
+	_, err := ref.Set(ctx, m, firestore.MergeAll)
 	return err
 }
