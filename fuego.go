@@ -49,9 +49,7 @@ func (f *Fuego) CancelBatch() {
 
 // Document returns a new FirestoreDocument.
 func (f *Fuego) Document(path, documentID string) *document.FirestoreDocument {
-	path = strings.TrimPrefix(path, "/")
-	path = strings.TrimSuffix(path, "/")
-	return document.New(f.FirestoreClient, path, documentID, f.WriteBatch)
+	return document.New(f.FirestoreClient, cleanPath(path), documentID, f.WriteBatch)
 }
 
 // DocumentWithGeneratedID returns a new FirestoreDocument without ID.
@@ -61,7 +59,13 @@ func (f *Fuego) DocumentWithGeneratedID(path string) *document.FirestoreDocument
 
 // Collection returns a new FirestoreCollection.
 func (f *Fuego) Collection(path string) *collection.FirestoreCollection {
+	return collection.New(f.FirestoreClient, cleanPath(path))
+}
+
+// cleanPath cleans and returns a given path.
+func cleanPath(path string) string {
 	path = strings.TrimPrefix(path, "/")
 	path = strings.TrimSuffix(path, "/")
-	return collection.New(f.FirestoreClient, path)
+
+	return path
 }

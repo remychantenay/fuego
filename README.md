@@ -124,6 +124,17 @@ if err != nil {
 }
 ```
 
+## Integration Tests
+1. Start the Firestore emulator:
+```bash
+firebase emulators:start --only firestore
+```
+
+2. Run the tests
+```bash
+go test . -v
+```
+
 ## Dependencies
 * Firebase: `firebase.google.com/go`
 * Firestore: `cloud.google.com/go/firestore`

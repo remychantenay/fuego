@@ -54,8 +54,6 @@ Fields - Numbers
 
 Numbers are stored in Firestore as int64. Fuego provides operations that are frequently performed with number fields.
 
-Usage
-
 For instance, you may want to increment or decrement a number field.
 With Fuego, this can be done in one single operatipn. It uses Transactions underneath.
 
@@ -64,6 +62,7 @@ With Fuego, this can be done in one single operatipn. It uses Transactions under
 	err := fuego.Document("users", "ben_button").Number(Age).Decrement(ctx)
 
 Fields - Arrays
+
 As you may know, dealing with arrays in Firestore documents can be somewhat of a burden.
 When updating an array field, the entire field is overridden.
 Using Fuego, you can decide to either override or append to the field:
@@ -89,6 +88,7 @@ Of course, you can also retrieve an array as follow:
 	fmt.Println("First Element: ", values[0].(string))
 
 Fields - Timestamp
+
 Timestamp fields work the same way as the other fields except that a timezone (IANA Time Zone)
 needs to be provided at retrieval:
 
