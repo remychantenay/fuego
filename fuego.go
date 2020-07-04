@@ -1,11 +1,12 @@
 package fuego
 
 import (
-	"cloud.google.com/go/firestore"
 	"context"
+	"strings"
+
+	"cloud.google.com/go/firestore"
 	"github.com/remychantenay/fuego/collection"
 	"github.com/remychantenay/fuego/document"
-	"strings"
 )
 
 // Fuego is a wrapper for the Firestore client.

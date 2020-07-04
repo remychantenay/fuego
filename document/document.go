@@ -2,8 +2,9 @@
 package document
 
 import (
-	"cloud.google.com/go/firestore"
 	"context"
+
+	"cloud.google.com/go/firestore"
 )
 
 // Document provides the necessary to interact with a Firestore document.

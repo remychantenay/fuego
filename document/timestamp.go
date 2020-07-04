@@ -1,10 +1,11 @@
 package document
 
 import (
-	"cloud.google.com/go/firestore"
 	"context"
-	"github.com/remychantenay/fuego/document/internal"
 	"time"
+
+	"cloud.google.com/go/firestore"
+	"github.com/remychantenay/fuego/document/internal"
 )
 
 // TimestampField provides the necessary to interact with a Firestore document field of type Timestamp.

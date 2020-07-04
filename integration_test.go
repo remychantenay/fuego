@@ -2,11 +2,12 @@ package fuego
 
 import (
 	"context"
-	firebase "firebase.google.com/go"
 	"fmt"
 	"os"
 	"testing"
 	"time"
+
+	firebase "firebase.google.com/go"
 )
 
 var fuego *Fuego

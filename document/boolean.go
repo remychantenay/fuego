@@ -1,8 +1,9 @@
 package document
 
 import (
-	"cloud.google.com/go/firestore"
 	"context"
+
+	"cloud.google.com/go/firestore"
 	"github.com/remychantenay/fuego/document/internal"
 )
 

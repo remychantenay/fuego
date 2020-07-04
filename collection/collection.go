@@ -2,8 +2,9 @@
 package collection
 
 import (
-	"cloud.google.com/go/firestore"
 	"context"
+
+	"cloud.google.com/go/firestore"
 	"github.com/remychantenay/fuego/collection/internal"
 	"google.golang.org/api/iterator"
 )

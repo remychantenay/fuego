@@ -1,8 +1,9 @@
 package internal
 
 import (
-	"cloud.google.com/go/firestore"
 	"context"
+
+	"cloud.google.com/go/firestore"
 )
 
 // RetrieveFieldValue returns the value of a field.
